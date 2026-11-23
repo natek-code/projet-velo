@@ -1,5 +1,6 @@
 import argparse
 from .velo_init import handle_init
+from .velo_favorites import handle_favorites, handle_favorites_add, handle_favorites_remove
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(

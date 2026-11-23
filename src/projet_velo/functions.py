@@ -8,4 +8,3 @@ def load_config():
             return yaml.safe_load(f)
     except FileNotFoundError:
         sys.exit("File not found")
-    

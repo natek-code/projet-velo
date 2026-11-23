@@ -14,7 +14,7 @@ def handle_init(args):
 
         config_dict = {
             "network": {"name":"V'Lille", "gbfs_url": "https://media.ilevia.fr/opendata/gbfs.json"}, 
-            "data": {"folder": str(Path.home()/".local"/"share"/"velo")}, 
+            "data": {"folder": Path.home()/".local"/"share"/"velo"}, 
             "refresh": {"max_age_days": 7 }, # au - del à : avertissement
             "collect":{"interval_seconds": 120}, # minimum 60
             "alerts": { 
