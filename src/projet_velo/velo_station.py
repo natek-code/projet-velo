@@ -24,7 +24,12 @@ def handle_station_search(args):
         print("Regex invalide")
         return 1
 
-    for s in get_stations():
-        if pattern.search(s["name"]):
-            print(f"{s['station_id']:<6} {s['name']}")
+    results = [s for s in get_stations() if pattern.search(s["name"])]
+
+    if not results:
+        print("Aucune station trouvée.")
+        return 0
+
+    for s in results:
+        print(f"{s['station_id']:<6} {s['name']}")
     return 0
