@@ -7,7 +7,10 @@ authors = [
     { name = "NatysPenot", email = "natys.penot@student.junia.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pyyaml>=6.0.4",
+    "requests>=2.34.2",
+]
 
 [project.scripts]
 projet-velo = "projet_velo:main"
