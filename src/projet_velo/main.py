@@ -1,6 +1,7 @@
 import argparse
 from .velo_init import handle_init
 from .refresh import handle_refresh
+from .velo_station import handle_station_list, handle_station_search
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
