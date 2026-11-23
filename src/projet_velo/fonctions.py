@@ -3,12 +3,12 @@ import yaml
 import requests 
 import os
 
-def handle_init():
+def handle_init(args):
     config_file = Path.home()/".config"/"velo"/"config.yaml"
     data_file = Path.home()/".local"/"share"/"velo"
     url  = "https://media.ilevia.fr/opendata/gbfs.json"
     
-    if not os.path.isfile(config_file):
+    if not os.path.isfile(config_file) or args.force:
         config_file.parent.mkdir(parents=True, exist_ok=True)
         data_file.mkdir(parents=True, exist_ok=True)
 
@@ -32,10 +32,3 @@ def handle_init():
         
         with open(config_file, "w") as f:
             yaml.dump(config_dict, f)
-
-       
-    
-
-
-        
-handle_init()
