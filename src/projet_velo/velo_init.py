@@ -53,10 +53,3 @@ def handle_init(args):
                 case "system_information": 
                     with open(vlille/"system_information.json", "w") as f:
                         json.dump(data_files, f)
-            
-           
-
-            
-
-            
-            
