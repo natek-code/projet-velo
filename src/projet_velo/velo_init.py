@@ -1,7 +1,7 @@
 from pathlib import Path
 import yaml 
 import requests 
-import os
+import os, json
 
 def handle_init(args):
     config_file = Path.home()/".config"/"velo"/"config.yaml"
@@ -14,7 +14,7 @@ def handle_init(args):
 
         config_dict = {
             "network": {"name":"V'Lille", "gbfs_url": "https://media.ilevia.fr/opendata/gbfs.json"}, 
-            "data": {"folder": Path.home()/".local"/"share"/"velo"}, 
+            "data": {"folder": str(Path.home()/".local"/"share"/"velo")}, 
             "refresh": {"max_age_days": 7 }, # au - del à : avertissement
             "collect":{"interval_seconds": 120}, # minimum 60
             "alerts": { 
@@ -32,3 +32,31 @@ def handle_init(args):
         
         with open(config_file, "w") as f:
             yaml.dump(config_dict, f)
+
+
+        data = requests.get(url)
+        vlille = data_file/"vlille"
+        vlille.mkdir(parents=True, exist_ok=True)
+
+        for i in range(4): 
+            files = data.json()["data"]["en"]["feeds"][i]
+            url_files = files["url"]
+            name_files = files["name"]
+            data_files = requests.get(url_files).json()
+            match name_files: 
+                case "vehicle_types": 
+                    with open(vlille/"vehicle_types.json", "w") as f:
+                        json.dump(data_files, f)
+                case "station_information": 
+                    with open(vlille/"station_information.json", "w") as f:
+                       json.dump(data_files, f)
+                case "system_information": 
+                    with open(vlille/"system_information.json", "w") as f:
+                        json.dump(data_files, f)
+            
+           
+
+            
+
+            
+            
