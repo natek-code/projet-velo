@@ -54,6 +54,7 @@ def handle_init(args):
                         with open(vlille/"system_information.json", "w") as f:
                             json.dump(data_files, f)
 
+<<<<<<< HEAD
             print(f"Configuration créée : {str(Path.home())}/.config/velo/config.yaml")
             print(f"Dossier de données créé : {str(Path.home())}/.local/share/velo/")
             print(f"Connexion à V’Lille : OK  {nb_station} station")
@@ -71,3 +72,24 @@ def handle_init(args):
 
             
             
+=======
+        data = requests.get(url)
+        vlille = data_file/"vlille"
+        vlille.mkdir(parents=True, exist_ok=True)
+
+        for i in range(4): 
+            files = data.json()["data"]["en"]["feeds"][i]
+            url_files = files["url"]
+            name_files = files["name"]
+            data_files = requests.get(url_files).json()
+            match name_files: 
+                case "vehicle_types": 
+                    with open(vlille/"vehicle_types.json", "w") as f:
+                        json.dump(data_files, f)
+                case "station_information": 
+                    with open(vlille/"station_information.json", "w") as f:
+                       json.dump(data_files, f)
+                case "system_information": 
+                    with open(vlille/"system_information.json", "w") as f:
+                        json.dump(data_files, f)
+>>>>>>> 372cb2452c3eb34f939f8db6eee38b150d613331
