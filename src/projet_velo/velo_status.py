@@ -17,7 +17,7 @@ def get_station_status():
     raise ValueError("Flux 'station_status' introuvable")
 
 
-def main():
+def handle_status(args : list | None):
     maintenant = datetime.datetime.now()
     stations = get_station_status()["data"]["stations"]
 
@@ -36,4 +36,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    handle_status()
