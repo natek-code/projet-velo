@@ -12,13 +12,20 @@ config = load_config()
 status_url = config["network"]["gbfs_url"]
 stations_file = Path(config["data"]["folder"])/"vlille"/"station_information.json"
 
-def get_stations_status():
-    infos = requests.get(status_url).json()
+def fetch_station_status(gbfs_url=None):
+    if gbfs_url is None:
+        gbfs_url = load_config()["network"]["gbfs_url"]
+    infos = requests.get(gbfs_url, timeout=10).json()
     for feed in infos["data"]["en"]["feeds"]:
         if feed["name"] == "station_status":
-            stations = requests.get(feed["url"]).json()["data"]["stations"]
-            return {str(st["station_id"]) : st for st in stations}
+            payload = requests.get(feed["url"], timeout=10).json()
+            return payload["last_updated"], payload["data"]["stations"]
     raise ValueError("Flux 'station_status' introuvable")
+
+
+def get_stations_status():
+    _, stations = fetch_station_status()
+    return {str(st["station_id"]): st for st in stations}
 
 def get_stations_info():
     stations = {}

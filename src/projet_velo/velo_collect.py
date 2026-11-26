@@ -5,7 +5,7 @@ import re
 import time
 import requests
 
-from .functions import load_config
+from .functions import fetch_station_status, load_config
 
 CSV_HEADER = [
     "timestamp",
@@ -19,7 +19,8 @@ CSV_HEADER = [
 ]
 
 
-def _parse_end_time(args, start_time):
+def _parse_end_time(args, start_time: datetime) -> datetime | None:
+    """Calcule la date/heure d'arrêt à partir de --duration ou --until."""
     if args.duration:
         match = re.fullmatch(r"(\d+)([hms])", args.duration.strip().lower())
         if not match:
@@ -43,26 +44,8 @@ def _parse_end_time(args, start_time):
     return None
 
 
-def _get_station_status_url(gbfs_url):
-    resp = requests.get(gbfs_url, timeout=10)
-    resp.raise_for_status()
-    feeds = resp.json()["data"]["en"]["feeds"]
-    for feed in feeds:
-        if feed["name"] == "station_status":
-            return feed["url"]
-    raise RuntimeError("Flux 'station_status' introuvable dans gbfs.json.")
-
-
-def _fetch_status(status_url):
-    resp = requests.get(status_url, timeout=10)
-    resp.raise_for_status()
-    payload = resp.json()
-    if "last_updated" not in payload or "stations" not in payload.get("data", {}):
-        raise ValueError("Réponse GBFS invalide pour station_status.")
-    return payload["last_updated"], payload["data"]["stations"]
-
-
-def _save_snapshot(history_dir, now_local, stations):
+def _save_snapshot(history_dir: Path, now_local: datetime, stations: list[dict]) -> None:
+    """Enregistre un relevé dans le fichier CSV correspondant à la date locale."""
     history_dir.mkdir(parents=True, exist_ok=True)
     csv_path = history_dir / f"{now_local.strftime('%Y-%m-%d')}.csv"
     file_exists = csv_path.is_file()
@@ -97,7 +80,8 @@ def _save_snapshot(history_dir, now_local, stations):
             ])
 
 
-def handle_collect(args):
+def handle_collect(args) -> int:
+    """Point d'entrée de la commande `velo collect`."""
     config = load_config()
 
     interval = (
@@ -119,11 +103,10 @@ def handle_collect(args):
     gbfs_url = config["network"]["gbfs_url"]
     history_dir = Path(config["data"]["folder"]) / "vlille" / "history"
 
-    status_url = None
-    last_seen_updated = None
+    last_seen_updated: int | None = None
     snapshots_count = 0
-    first_snap_time = None
-    last_snap_time = None
+    first_snap_time: datetime | None = None
+    last_snap_time: datetime | None = None
 
     print("Démarrage de la collecte (Ctrl+C pour arrêter)...")
 
@@ -134,10 +117,7 @@ def handle_collect(args):
                 break
 
             try:
-                if status_url is None:
-                    status_url = _get_station_status_url(gbfs_url)
-
-                last_updated, stations = _fetch_status(status_url)
+                last_updated, stations = fetch_station_status(gbfs_url)
 
                 if last_updated == last_seen_updated:
                     print(f"[{now.strftime('%H:%M:%S')}] Relevé ignoré (données inchangées).")
@@ -148,10 +128,14 @@ def handle_collect(args):
                     if first_snap_time is None:
                         first_snap_time = now
                     last_snap_time = now
-                    print(f"[{now.strftime('%H:%M:%S')}] Relevé #{snapshots_count} enregistré ({len(stations)} stations).")
+                    print(
+                        f"[{now.strftime('%H:%M:%S')}] Relevé #{snapshots_count} enregistré ({len(stations)} stations)."
+                    )
 
-            except (requests.RequestException, KeyError, ValueError, RuntimeError) as e:
-                print(f"[{now.strftime('%H:%M:%S')}] Erreur réseau : {e} (nouvel essai au prochain cycle)")
+            except (requests.RequestException, KeyError, ValueError, RuntimeError, OSError) as e:
+                print(
+                    f"[{now.strftime('%H:%M:%S')}] Erreur lors de la collecte : {e} (nouvel essai au prochain cycle)"
+                )
 
             if args.once:
                 break
