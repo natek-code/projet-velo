@@ -1,7 +1,9 @@
 import requests
 import datetime
+from .functions import load_config
 
-url = "https://media.ilevia.fr/opendata/gbfs.json"
+config = load_config()
+url = config["network"]["gbfs_url"]
 
 
 def info(url):
