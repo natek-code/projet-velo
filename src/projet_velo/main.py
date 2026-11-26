@@ -5,6 +5,7 @@ from .velo_station import handle_station_list, handle_station_search
 from .velo_favorites import handle_favorites, handle_favorites_add, handle_favorites_remove
 from .velo_status import handle_status
 from .dashboard import handle_dashboard
+from .velo_collect import handle_collect
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
