@@ -19,7 +19,7 @@ def get_station_status():
     raise ValueError("Flux 'station_status' introuvable")
 
 
-def handle_status(args : list | None):
+def calcul_status():
     maintenant = datetime.datetime.now()
     stations = get_station_status()["data"]["stations"]
 
@@ -30,11 +30,18 @@ def handle_status(args : list | None):
     velos = sum(s["num_bikes_available"] for s in stations)
     places = sum(s["num_docks_available"] for s in stations)
 
-    print(f"V'Lille - données du {maintenant:%d/%m/%Y} à {maintenant:%H:%M:%S}\n")
-    print(f"Stations en service {marche} / {nombre} hors service {nombre-marche}")
-    print(f"         vides {vide} pleines {plein}")
-    print(f"Vélos disponibles {velos} places libres {places}")
-    print(f"      taux de remplissage {round((velos/places)*100)}%")
+    return {"maintenant": maintenant, "stations": stations, "nombre": nombre, "vide": vide,
+            "plein":plein, "marche": marche, "velos": velos, "places": places}
+   
+
+def handle_status(args : list | None):
+    resultat = calcul_status()
+    print(f"V'Lille - données du {resultat["maintenant"]:%d/%m/%Y} à {resultat["maintenant"]:%H:%M:%S}\n")
+    print(f"Stations en service {resultat["marche"]} / {resultat["nombre"]} hors service {resultat["nombre"]-resultat["marche"]}")
+    print(f"         vides {resultat["vide"]} pleines {resultat["plein"]}")
+    print(f"Vélos disponibles {resultat["velos"]} places libres {resultat["places"]}")
+    print(f"      taux de remplissage {round((resultat["velos"]/resultat["places"])*100)}%")
+
 
 
 if __name__ == "__main__":
