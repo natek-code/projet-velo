@@ -1,4 +1,4 @@
-from .functions import load_config
+from .functions import *
 from pathlib import Path
 import os, json
 
@@ -20,18 +20,6 @@ def get_favs():
 
     return []
 
-def get_list_stations():
-    stations_id = []
-    try:
-        with open(stations_file, "r", encoding="utf-8") as f:
-            stations = json.load(f)["data"]["stations"]
-            for ele in stations:
-                stations_id.append(ele["station_id"])
-    except (FileNotFoundError, json.JSONDecodeError):
-        pass
-
-    return stations_id
-
 def write_favs(favs):
     try:
         with open(fav_file, "w", encoding="utf-8") as f:
@@ -39,17 +27,24 @@ def write_favs(favs):
     except FileNotFoundError:
         pass
 
-favs = get_favs()
-
 def handle_favorites(args):
+    favs = get_favs()
     if len(favs) == 0:
         print("Liste des favoris vide, vous pouvez en ajouter via velo favorites add 'id_station'")
+        return
+    print(f"{"ID":<{3}} {"Station":<{25}} {"Velos":<{5}} {"Places":<{5}}")
+    stations_infos = get_stations_info()
+    stations_status = get_stations_status()
     for ele in favs:
-        print(ele)
+        info = get_info(ele, stations_infos)
+        status = get_status(ele, stations_status)
+        print(f"{info["station_id"]:<{3}} {info["name"]:<{25}} {status["num_bikes_available"]:<{5}} {status["num_docks_available"]:<{5}}")
+        
 
 def handle_favorites_add(args):
-    stations_id = get_list_stations()
-    if args.station_id not in stations_id:
+    favs = get_favs()
+    stations = get_stations_info()
+    if args.station_id not in list(stations.keys()):
         print("L'id de la station n'existe pas !")
     if len(favs) >= MAX_FAVORITES :
         print("Liste des favoris pleine, vous pouvez en retirer via velo favorites remove 'id_station'")
@@ -58,6 +53,7 @@ def handle_favorites_add(args):
     write_favs(favs)
 
 def handle_favorites_remove(args):
+    favs = get_favs()
     if args.station_id in favs:
         favs.pop(favs.index(args.station_id))
     else:

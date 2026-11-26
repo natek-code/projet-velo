@@ -1,27 +1,11 @@
 import requests
 import datetime
-from .functions import load_config
-
-config = load_config()
-url = config["network"]["gbfs_url"]
-
-
-def info(url):
-    info = requests.get(url)
-    return info.json()
-
-
-def get_station_status():
-    infos = info(url)
-    for feed in infos["data"]["en"]["feeds"]:
-        if feed["name"] == "station_status":
-            return info(feed["url"])
-    raise ValueError("Flux 'station_status' introuvable")
+from .functions import *
 
 
 def calcul_status():
     maintenant = datetime.datetime.now()
-    stations = get_station_status()["data"]["stations"]
+    stations = list(get_stations_status().values())
 
     nombre = len(stations)
     vide = sum(1 for s in stations if s["num_bikes_available"]==0)
