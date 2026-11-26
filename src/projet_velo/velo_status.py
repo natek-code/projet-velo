@@ -1,25 +1,11 @@
 import requests
 import datetime
-
-url = "https://media.ilevia.fr/opendata/gbfs.json"
-
-
-def info(url):
-    info = requests.get(url)
-    return info.json()
-
-
-def get_station_status():
-    infos = info(url)
-    for feed in infos["data"]["en"]["feeds"]:
-        if feed["name"] == "station_status":
-            return info(feed["url"])
-    raise ValueError("Flux 'station_status' introuvable")
+from .functions import *
 
 
 def handle_status(args : list | None):
     maintenant = datetime.datetime.now()
-    stations = get_station_status()["data"]["stations"]
+    stations = list(get_stations_status().values())
 
     nombre = len(stations)
     vide = sum(1 for s in stations if s["num_bikes_available"]==0)
